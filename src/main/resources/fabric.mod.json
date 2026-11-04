@@ -7,6 +7,11 @@
   "authors": [
     "ScripterCarft"
   ],
+  "contact": {
+    "homepage": "https://github.com/ScripterCarft/steadybreak",
+    "sources": "https://github.com/ScripterCarft/steadybreak",
+    "issues": "https://github.com/ScripterCarft/steadybreak/issues"
+  },
   "license": "MIT",
   "icon": "assets/steadybreak/icon.png",
   "environment": "client",
