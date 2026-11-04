@@ -1,0 +1,81 @@
+plugins {
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+}
+
+version = "${project.mod_version}+mc${project.minecraft_version}"
+group = project.maven_group
+
+base {
+	archivesName = project.archives_base_name
+}
+
+sourceSets {
+	verify {
+		compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+}
+
+processResources {
+	def modVersion = project.version
+	inputs.property 'version', modVersion
+
+	filesMatching('fabric.mod.json') {
+		expand 'version': modVersion
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	options.encoding = 'UTF-8'
+	options.release = 25
+}
+
+java {
+	withSourcesJar()
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
+}
+
+jar {
+	from('LICENSE') {
+		rename { "${it}_SteadyBreak" }
+	}
+}
+
+// The verify mod runs inside the real Fabric loader without opening a game window, so a renamed
+// Minecraft method or a broken fix fails the build. See VerifyEntrypoint.
+def verifyJar = tasks.register('verifyJar', Jar) {
+	from sourceSets.verify.output
+	archiveFileName = 'steadybreak-verify.jar'
+	destinationDirectory = layout.buildDirectory.dir('verify')
+}
+
+def prepareVerifyMods = tasks.register('prepareVerifyMods', Sync) {
+	from jar
+	from verifyJar
+	// -PextraModsDir=<mods folder> also checks compatibility with the mods of a real instance.
+	if (project.hasProperty('extraModsDir')) {
+		from(project.property('extraModsDir')) {
+			include '*.jar'
+			exclude 'steadybreak-*.jar'
+		}
+	}
+	into layout.buildDirectory.dir('verify/game/mods')
+}
+
+def verifyInLoader = tasks.register('verifyInLoader', JavaExec) {
+	group = 'verification'
+	description = 'Runs the patched Minecraft methods inside the real Fabric loader.'
+	dependsOn prepareVerifyMods
+	classpath = configurations.runtimeClasspath
+	mainClass = 'net.fabricmc.loader.impl.launch.knot.KnotClient'
+	workingDir = layout.buildDirectory.dir('verify/game')
+	args '--gameDir', layout.buildDirectory.dir('verify/game').get().asFile.absolutePath
+	systemProperty 'java.awt.headless', 'true'
+}
+
+check.dependsOn verifyInLoader

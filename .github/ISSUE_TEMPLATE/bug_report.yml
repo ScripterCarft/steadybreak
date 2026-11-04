@@ -1,0 +1,31 @@
+name: Bug report
+description: Break progress still resets, or the mod causes a problem
+labels: [bug]
+body:
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: SteadyBreak, Minecraft and Fabric Loader
+      placeholder: 1.0.0-alpha.1, 26.3, 0.20.1
+    validations:
+      required: true
+  - type: input
+    id: server
+    attributes:
+      label: Server
+      placeholder: Hypixel SkyBlock, singleplayer, ...
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: What happened?
+      description: The tool you held, what you mined, and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: mods
+    attributes:
+      label: Other mods and log
+      description: Your mod list and, after a crash, the log or crash report.

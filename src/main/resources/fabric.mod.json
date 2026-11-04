@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "steadybreak",
+  "version": "${version}",
+  "name": "SteadyBreak",
+  "description": "Stops held-item updates (Mending, Hypixel SkyBlock drill fuel and counters) from resetting block break progress and replaying the equip animation.",
+  "authors": [
+    "ScripterCarft"
+  ],
+  "license": "MIT",
+  "icon": "assets/steadybreak/icon.png",
+  "environment": "client",
+  "mixins": [
+    "steadybreak.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.20.1",
+    "minecraft": "~26.3",
+    "java": ">=25"
+  }
+}
