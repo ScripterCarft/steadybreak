@@ -4,6 +4,7 @@
   "package": "io.github.scriptercarft.steadybreak.mixin",
   "compatibilityLevel": "JAVA_25",
   "client": [
+    "DestroyDirectionPacketMixin",
     "FirstPersonHandsAndItemsMixin",
     "MultiPlayerGameModeMixin"
   ],

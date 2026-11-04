@@ -4,10 +4,11 @@
 
 <h1 align="center">SteadyBreak</h1>
 
-<p align="center">Keeps your block break progress when the server updates the item in your hand.</p>
+<p align="center">Keeps your block break going when the server updates the item in your hand or your crosshair changes block face.</p>
 
 > [!WARNING]
-> SteadyBreak is in alpha. It has not been tested on a live server yet.
+> SteadyBreak is in alpha. So far it has only had a short test on Hypixel SkyBlock. Check the rules of
+> the server you play on before you use it, because it changes which packets the client sends.
 
 ## The problem
 
@@ -20,6 +21,16 @@ Typical triggers:
 - Hypixel SkyBlock updating drill fuel, lore or counters
 
 SteadyBreak also stops these updates from replaying the equip animation.
+
+### Breaks that stop on Hypixel
+
+Minecraft 26.3 sends a new `CHANGE_DESTROY_DIRECTION` packet when your crosshair moves to another face
+of the block you are breaking. On Hypixel the block can stop taking damage while your hand keeps
+swinging, until you click again. In testing, the stall went away once this packet was no longer sent.
+The exact server-side cause is unconfirmed, because the server code is not public.
+
+SteadyBreak keeps this packet on the client. The server still gets the final direction when the break
+finishes.
 
 ## Install
 
@@ -43,16 +54,21 @@ Without an active break the mod does nothing, so a new break still sends its STA
 
 The equip animation uses the same check, and a count change still plays it.
 
-There is no tick handler, packet hook or config. The mod's code only does work after Minecraft's own
-check has failed, and an accepted update refreshes the stored stack so later ticks use the vanilla
-path again.
+The direction packet is filtered at the one place Minecraft sends it, in `continueDestroyBlock`. No
+other packet is held back or delayed.
+
+There is no tick handler, timer or config, and break speed stays the same. The item check only runs
+after Minecraft's own check has failed, and an accepted update refreshes the stored stack so later
+ticks use the vanilla path again.
 
 ### Known limits
 
 - SkyBlock items without a `uuid` whose `custom_data` changes still reset.
 - Swapping between two tools that differ only in `damage` or `lore` keeps progress. Their mining
-  speed is identical.
+  speed is identical. A swap between tools that differ only in `lore` also plays no equip animation.
 - If a server resets its own break progress, a client mod cannot prevent that.
+- During a break, the server does not see face changes until the break finishes. A vanilla 26.3 server
+  only stores the direction. A server plugin that reads the packet would not get it.
 
 ## Build
 

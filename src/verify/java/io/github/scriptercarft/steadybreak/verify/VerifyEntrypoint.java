@@ -1,5 +1,6 @@
 package io.github.scriptercarft.steadybreak.verify;
 
+import io.github.scriptercarft.steadybreak.BreakPackets;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
@@ -8,10 +9,12 @@ import net.minecraft.client.player.FirstPersonHandsAndItems;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.entity.EntityEquipment;
 import net.minecraft.world.entity.LivingEntity;
@@ -51,6 +54,7 @@ public final class VerifyEntrypoint implements PreLaunchEntrypoint {
             setUp();
             miningChecks();
             equipAnimationChecks();
+            directionPacketChecks();
             exit = failures == 0 ? 0 : 1;
             System.out.println("[verify] " + (failures == 0 ? "ALL PASSED" : failures + " FAILED"));
         } catch (Throwable t) {
@@ -132,6 +136,23 @@ public final class VerifyEntrypoint implements PreLaunchEntrypoint {
 
         ItemStack blocks = new ItemStack(Items.STONE, 2);
         check("count change keeps equip animation", instantReplace(blocks, new ItemStack(Items.STONE, 1)), false);
+    }
+
+    private void directionPacketChecks() {
+        check("direction change is recognized", BreakPackets.isDirectionChange(action(ServerboundPlayerActionPacket.Action.CHANGE_DESTROY_DIRECTION)), true);
+        check("start packet still goes out", BreakPackets.isDirectionChange(action(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK)), false);
+        check("abort packet still goes out", BreakPackets.isDirectionChange(action(ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK)), false);
+        check("stop packet still goes out", BreakPackets.isDirectionChange(action(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK)), false);
+
+        boolean wrapped = false;
+        for (Method method : MultiPlayerGameMode.class.getDeclaredMethods()) {
+            wrapped |= method.getName().contains("keepDirectionChangeLocal");
+        }
+        check("direction packet filter is applied to continueDestroyBlock", wrapped, true);
+    }
+
+    private static ServerboundPlayerActionPacket action(ServerboundPlayerActionPacket.Action action) {
+        return new ServerboundPlayerActionPacket(action, POS, Direction.UP);
     }
 
     private boolean mining(ItemStack started, ItemStack heldNow, BlockPos target) throws Exception {

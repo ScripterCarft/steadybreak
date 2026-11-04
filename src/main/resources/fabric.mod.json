@@ -3,7 +3,7 @@
   "id": "steadybreak",
   "version": "${version}",
   "name": "SteadyBreak",
-  "description": "Stops held-item updates (Mending, Hypixel SkyBlock drill fuel and counters) from resetting block break progress and replaying the equip animation.",
+  "description": "Stops held-item updates (Mending, Hypixel SkyBlock drill fuel and counters) from resetting block break progress and replaying the equip animation, and fixes breaks that stop on Hypixel in 26.3.",
   "authors": [
     "ScripterCarft"
   ],

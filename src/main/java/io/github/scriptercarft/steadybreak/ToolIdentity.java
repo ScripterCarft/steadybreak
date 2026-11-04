@@ -5,6 +5,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 
+import java.util.Optional;
 import java.util.function.Predicate;
 
 /**
@@ -27,19 +28,18 @@ public final class ToolIdentity {
         }
         // Hypixel SkyBlock stores a per-item "uuid" in custom_data. When both stacks have one it is
         // authoritative: fuel and counter updates keep it, and a second copy of a tool never shares it.
-        String uuidA = skyblockUuid(a);
-        String uuidB = skyblockUuid(b);
-        if (uuidA != null && uuidB != null) {
+        Optional<String> uuidA = skyblockUuid(a);
+        Optional<String> uuidB = skyblockUuid(b);
+        if (uuidA.isPresent() && uuidB.isPresent()) {
             return uuidA.equals(uuidB);
         }
         return ItemStack.matchesIgnoringComponents(a, b, COSMETIC_OR_WEAR);
     }
 
-    private static String skyblockUuid(ItemStack stack) {
-        CustomData data = stack.get(DataComponents.CUSTOM_DATA);
-        if (data == null) {
-            return null;
-        }
-        return data.copyTag().getString("uuid").filter(uuid -> !uuid.isEmpty()).orElse(null);
+    private static Optional<String> skyblockUuid(ItemStack stack) {
+        return stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY)
+                .copyTag()
+                .getString("uuid")
+                .filter(Predicate.not(String::isEmpty));
     }
 }

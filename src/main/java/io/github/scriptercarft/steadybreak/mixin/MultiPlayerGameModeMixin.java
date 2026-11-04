@@ -1,7 +1,7 @@
 package io.github.scriptercarft.steadybreak.mixin;
 
-import io.github.scriptercarft.steadybreak.ToolIdentity;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import io.github.scriptercarft.steadybreak.ToolIdentity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.world.item.ItemStack;
